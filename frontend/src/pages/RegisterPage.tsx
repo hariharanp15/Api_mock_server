@@ -1,0 +1,10 @@
+import { useState } from 'react';
+import { Alert, Box, Button, Link, TextField, Typography } from '@mui/material';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import client from '../api/client';
+
+export default function RegisterPage() {
+  const navigate = useNavigate(); const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [confirm, setConfirm] = useState(''); const [error, setError] = useState(''); const [saving, setSaving] = useState(false);
+  const submit = async (event: React.FormEvent) => { event.preventDefault(); setError(''); if (password !== confirm) return setError('Passwords do not match.'); setSaving(true); try { const { data } = await client.post('/auth/register', { email, password }); localStorage.setItem('token', data.access_token); navigate('/'); } catch (e: any) { setError(e.response?.data?.detail ?? 'Unable to create your account.'); } finally { setSaving(false); } };
+  return <Box component="form" onSubmit={submit} maxWidth={420} sx={{ mx: 'auto', mt: 6 }}><Typography variant="h4" gutterBottom>Create your account</Typography><Typography color="text.secondary" sx={{ mb: 2 }}>Start building mock APIs in seconds.</Typography>{error && <Alert severity="error">{error}</Alert>}<TextField fullWidth required type="email" label="Email" margin="normal" value={email} onChange={e => setEmail(e.target.value)} /><TextField fullWidth required type="password" label="Password" helperText="At least 8 characters" margin="normal" value={password} onChange={e => setPassword(e.target.value)} /><TextField fullWidth required type="password" label="Confirm password" margin="normal" value={confirm} onChange={e => setConfirm(e.target.value)} /><Button type="submit" fullWidth variant="contained" disabled={saving} sx={{ mt: 2 }}>{saving ? 'Creating account…' : 'Create account'}</Button><Typography align="center" sx={{ mt: 2 }}>Already registered? <Link component={RouterLink} to="/login">Sign in</Link></Typography></Box>;
+}
